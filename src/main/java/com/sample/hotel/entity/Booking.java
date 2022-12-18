@@ -1,5 +1,6 @@
 package com.sample.hotel.entity;
 
+import com.sample.hotel.listener.BookingEventListener;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Table(name = "BOOKING", indexes = {
         @Index(name = "IDX_BOOKING_CLIENT", columnList = "CLIENT_ID")
 })
+@EntityListeners(BookingEventListener.class)
 @Entity
 public class Booking {
     @JmixGeneratedValue
