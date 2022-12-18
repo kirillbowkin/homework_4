@@ -8,7 +8,10 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.UUID;
 
 @JmixEntity
@@ -21,14 +24,19 @@ public class Room {
     @Id
     private UUID id;
 
+    @Max(999)
+    @Min(100)
     @InstanceName
     @NotNull
     @Column(name = "NUMBER_", nullable = false)
     private Integer number;
 
+    @Max(9)
+    @Min(1)
     @Column(name = "FLOOR_")
     private Integer floor;
 
+    @Positive
     @Column(name = "SQUARE_METERS")
     private Integer squareMeters;
 
