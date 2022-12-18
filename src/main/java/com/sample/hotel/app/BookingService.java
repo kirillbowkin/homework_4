@@ -5,8 +5,16 @@ import com.sample.hotel.entity.Room;
 import com.sample.hotel.entity.RoomReservation;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import java.util.List;
+
 @Component
 public class BookingService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     /**
      * Check if given room is suitable for the booking.
@@ -15,20 +23,39 @@ public class BookingService {
      * Use javax.persistence.EntityManager and JPQL query for querying database.
      *
      * @param booking booking
-     * @param room room
+     * @param room    room
      * @return true if checks are passed successfully
      */
     public boolean isSuitable(Booking booking, Room room) {
-        //todo implement me!
+        if (room.getSleepingPlaces() < booking.getNumberOfGuests()) {
+            return false;
+        }
+
+        TypedQuery<RoomReservation> query = entityManager.createQuery(
+                "SELECT rr FROM RoomReservation rr " +
+                        "WHERE rr.room = :room " +
+                        "AND rr.booking.arrivalDate <= :departureDate " +
+                        "AND rr.booking.departureDate > :arrivalDate", RoomReservation.class);
+        query.setParameter("room", room);
+        query.setParameter("arrivalDate", booking.getArrivalDate());
+        query.setParameter("departureDate", booking.getDepartureDate());
+
+        List<RoomReservation> rr = query.getResultList();
+
+        if (rr.size() > 0) {
+            return false;
+        }
+
         return true;
+
     }
 
     /**
      * Check that room is suitable for the booking, and create a reservation for this room.
-     * @param room room to reserve
-     * @param booking hotel booking
-     * Wrap operation into a transaction (declarative or manual).
      *
+     * @param room    room to reserve
+     * @param booking hotel booking
+     *                Wrap operation into a transaction (declarative or manual).
      * @return created reservation object, or null if room is not suitable
      */
     public RoomReservation reserveRoom(Booking booking, Room room) {
