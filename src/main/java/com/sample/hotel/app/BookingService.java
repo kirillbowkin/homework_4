@@ -3,7 +3,11 @@ package com.sample.hotel.app;
 import com.sample.hotel.entity.Booking;
 import com.sample.hotel.entity.Room;
 import com.sample.hotel.entity.RoomReservation;
+import io.jmix.core.Metadata;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -15,6 +19,8 @@ public class BookingService {
 
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    private Metadata metadata;
 
     /**
      * Check if given room is suitable for the booking.
@@ -58,8 +64,16 @@ public class BookingService {
      *                Wrap operation into a transaction (declarative or manual).
      * @return created reservation object, or null if room is not suitable
      */
+    @Transactional
     public RoomReservation reserveRoom(Booking booking, Room room) {
-        //todo implement me!
-        return null;
+        RoomReservation roomReservation = metadata.create(RoomReservation.class);
+        if(!isSuitable(booking, room)) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+
+        roomReservation.setBooking(booking);
+        roomReservation.setRoom(room);
+        entityManager.persist(roomReservation);
+        return roomReservation;
     }
 }
